@@ -4,11 +4,11 @@
 
 <div align="center">
   <a href="https://world.openfoodfacts.org/">
-    <img src="https://www.projets-libres.org/wp-content/uploads/2024/02/openfoodfacts-logo.jpg" alt="Logo">
+    <img src="https://www.themealdb.com/images/logo.svg" alt="Logo">
   </a>
 </div>
 
-**Food-App** is a C# Console application that helps users discover food recipes, nutritional details, and dietary information. By connecting to the Open Food Facts and TheMealDB APIs, it allows users to search for meals, verify vegan/vegetarian suitability, and manage a personal collection of favorite recipes.
+**Food-App** is a C# Console application that helps users discover food recipes, nutritional details, and dietary information. By connecting to the TheMealDB APIs, it allows users to search for meals, verify vegan/vegetarian suitability, and manage a personal collection of favorite recipes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -73,15 +73,14 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Feature 1: link the app with Open Food Facts API
-- [ ] Feature 2: add search by name feature
+- [x] Feature 1: link the app with the mealdb api
+- [x] Feature 2: add search by name feature
+  - [ ] Nested Feature: select a meal after the fetch is over(all meals are listed) to show its ingredients 
 - [ ] Feature 3: add search by category feature
     - [ ] Optional Feature 1: add search by country
 - [ ] Feature 4: add main menu to make it suitable for user usage
 - [ ] Feature 5: add save to favourites option
 - [ ] Feature 6: add edit favourite recipes
-- [ ] Feature 7: link the app with the mealdb api
-    - [ ] Nested Feature 1: add choose website option in the main menu
 
 
 See the [open issues](https://github.com/AhmedLouay-coder21/Food-App/issues) for a full list of proposed features (and known issues).

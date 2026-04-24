@@ -1,6 +1,15 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+using System.Diagnostics.Metrics;
+using System.Runtime.InteropServices;
+using FoodApp;
 
-app.MapGet("/", () => "Hello World!");
-
-app.Run();
+namespace FoodApp
+{
+    internal class Program
+    {
+        static async Task Main(string[] args)
+        {
+            var MainMenu = new MainMenu();
+            await MainMenu.StartProgram();
+        }
+    }
+}
