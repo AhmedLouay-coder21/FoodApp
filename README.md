@@ -1,4 +1,4 @@
-# Food-App
+# FoodApp
 
 ## About The Project
 
@@ -8,7 +8,7 @@
   </a>
 </div>
 
-**Food-App** is a C# Console application that helps users discover food recipes, nutritional details, and dietary information. By connecting to the TheMealDB APIs, it allows users to search for meals, verify vegan/vegetarian suitability, and manage a personal collection of favorite recipes.
+**FoodApp** is a C# Console application that helps users discover food recipes, nutritional details, and dietary information. By connecting to the TheMealDB APIs, it allows users to search for meals, verify vegan/vegetarian suitability, and manage a personal collection of favorite recipes.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -37,7 +37,7 @@ To get a local copy up and running, follow these steps.
 
 1. Clone the repo
    ```sh
-   git clone [https://github.com/AhmedLouay-coder21/Food-App.git](https://github.com/AhmedLouay-coder21/Food-App.git)
+   git clone [https://github.com/AhmedLouay-coder21/FoodApp.git](https://github.com/AhmedLouay-coder21/FoodApp.git)
 2. Restore NuGet packages
   Bash
   dotnet restore
@@ -79,11 +79,11 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 - [ ] Feature 3: add search by category feature
     - [ ] Optional Feature 1: add search by country
 - [ ] Feature 4: add main menu to make it suitable for user usage
-- [ ] Feature 5: add save to favourites option
-- [ ] Feature 6: add edit favourite recipes
+- [ ] Feature 5: add save to favorites option
+- [ ] Feature 6: add edit favorite recipes
 
 
-See the [open issues](https://github.com/AhmedLouay-coder21/Food-App/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/AhmedLouay-coder21/FoodApp/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -127,7 +127,7 @@ Distributed under the project_license. See `LICENSE.txt` for more information.
 
 Ahmad Louay Mahmoud Saied - [@gmail](ahmedlouay215@gmail.com)
 
-Project Link: [https://github.com/AhmedLouay-coder21/Food-App](https://github.com/AhmedLouay-coder21/Food-App)
+Project Link: [https://github.com/AhmedLouay-coder21/FoodApp](https://github.com/AhmedLouay-coder21/FoodApp)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
