@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using FoodApp.Models;
 using Spectre.Console;
 namespace FoodApp;
@@ -17,11 +18,32 @@ public class MealService
     public async Task<List<Meal>> SearchByName(string name)
     {
         var response = await _httpClient.GetFromJsonAsync<MealWrapper>($"search.php?s={name}");
-        
-        foreach(var meal in response?.meals ?? Enumerable.Empty<Meal>())
+        var meals = response?.meals ?? new List<Meal>();
+        if(!meals.Any())
         {
-            AnsiConsole.MarkupLine($"[OrangeRed1]{meal.strMeal}[/]");
+            AnsiConsole.MarkupLine("[red]No meals found![/]");
+            return response?.meals ?? new List<Meal>();
         }
+        var prompt = new SelectionPrompt<string>()
+        .Title("Select a [OrangeRed1]meal[/] by category")
+        .PageSize(15)
+        .MoreChoicesText("[grey](Move up and down to reveal more meals)[/]");
+
+        var groupedMeals = meals
+        .GroupBy(m => m.strCategory)
+        .OrderBy(g => g.Key);
+        foreach(var category in groupedMeals)
+        {
+                prompt.AddChoiceGroup(category.Key, category.Select(m => m.strMeal));
+                // AnsiConsole.Status() // disable to test purposes
+                // .Start("Processing...", ctx =>
+                // {
+                //     Thread.Sleep(2500);
+                // });
+        }
+        AnsiConsole.MarkupLine("[green]Done![/]");
+        var selectedMealName = AnsiConsole.Prompt(prompt);
+
         return response?.meals ?? new List<Meal>();
     }
 }
