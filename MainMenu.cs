@@ -1,6 +1,8 @@
 using System;
 using Spectre.Console;
 using FoodApp;
+using FoodApp.Controllers;
+using FoodApp.Services;
 
 namespace FoodApp
 {
@@ -25,9 +27,11 @@ namespace FoodApp
             {
                 case "Search for a new recipe":
                     var mealName = AnsiConsole.Ask<string>("What [OrangeRed1]meal[/] do you wanna discover?");
+                    Console.Clear();
                     HttpClient client = new();
                         var mealService = new MealService(client);
-                        await mealService.SearchByName(mealName);
+                        var mealController = new MealController(mealService);
+                        await mealController.SearchByName(mealName);
                     break;
             }
         }
