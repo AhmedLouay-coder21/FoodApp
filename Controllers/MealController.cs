@@ -42,6 +42,16 @@ public class MealController
 
         var selectedMealName = AnsiConsole.Prompt(prompt);
         var meal = meals.FirstOrDefault(m => m.strMeal == selectedMealName);
+        var url = meal?.strMealThumb;
+        var mealName = meal?.strMeal;
+        if (!string.IsNullOrEmpty(url))
+        {
+            var localPath = await _mealService.SaveImageAsync(url,mealName);
+            var image = new CanvasImage(localPath)
+            .MaxWidth(100)
+            .BicubicResampler();
+            AnsiConsole.Write(image);
+        }
         if(meal is null)
         {
             AnsiConsole.MarkupLine("[red]Error: Could not retrieve meal details.[/]");
@@ -82,6 +92,7 @@ public class MealController
                 Name = meal.strMeal,
                 Category = meal.strCategory,
                 Area = meal.strArea,
+                Image = meal.strMeal + ".png",
                 Instructions = meal.strInstructions,
                 Tags = meal.strTags,
                 YoutubeLink = meal.strYoutube,
@@ -124,8 +135,16 @@ public class MealController
                     : $"- {i.Name} ({i.Measure})"
             )
         );
-
-        var panel = new Panel($@"[OrangeRed1]Meal:[/] {Markup.Escape(meal.Name ?? "Unknown")}
+        if (!string.IsNullOrEmpty(meal.Name))
+        {
+            var localPath = await _mealService.SaveImageAsync(" ",meal.Name);
+            var image = new CanvasImage(localPath)
+            .MaxWidth(100)
+            .BicubicResampler();
+            AnsiConsole.Write(image);
+        }
+        var panel = new Panel($@"
+[OrangeRed1]Meal:[/] {Markup.Escape(meal.Name ?? "Unknown")}
 [OrangeRed1]Category:[/] {Markup.Escape(meal.Category ?? "Unknown")}
 [OrangeRed1]Area:[/] {Markup.Escape(meal.Area ?? "Unknown")}
 

@@ -25,4 +25,17 @@ public class MealService : IMealService
 
         return response?.meals ?? new List<Meal>();
     }
+    public async Task<string> SaveImageAsync(string url, string name)
+    {
+        var folder = Path.Combine(Directory.GetCurrentDirectory(), "Files");
+        Directory.CreateDirectory(folder);
+        var fileName = name + ".png";
+        var path = Path.Combine(folder, fileName);
+        if (File.Exists(path))
+            return path;
+        var bytes = await _httpClient.GetByteArrayAsync(url);
+        await File.WriteAllBytesAsync(path, bytes);
+        
+        return path;
+    }
 }
