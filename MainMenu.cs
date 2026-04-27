@@ -3,6 +3,7 @@ using Spectre.Console;
 using FoodApp;
 using FoodApp.Controllers;
 using FoodApp.Services;
+using FoodApp.Data;
 
 namespace FoodApp
 {
@@ -10,6 +11,11 @@ namespace FoodApp
     {
         public static async Task StartProgram()
         {
+            HttpClient client = new();
+            var db = new MealDbContext();
+            var mealService = new MealService(client);
+            var mealRepository = new MealRepository(db);
+            var mealController = new MealController(mealService,mealRepository);
             //App name
             var figlet = new FigletText("Food App")
             {
@@ -28,10 +34,10 @@ namespace FoodApp
                 case "Search for a new recipe":
                     var mealName = AnsiConsole.Ask<string>("What [OrangeRed1]meal[/] do you wanna discover?");
                     Console.Clear();
-                    HttpClient client = new();
-                        var mealService = new MealService(client);
-                        var mealController = new MealController(mealService);
                         await mealController.SearchByName(mealName);
+                    break;
+                case "View favorite recipes":
+                    await mealController.GetMeal(db);
                     break;
             }
         }

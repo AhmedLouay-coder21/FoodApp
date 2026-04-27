@@ -9,7 +9,10 @@ namespace FoodApp
         static async Task Main(string[] args)
         {
             var MainMenu = new MainMenu();
-            await MainMenu.StartProgram();
+            while(true)
+            {
+                await MainMenu.StartProgram();
+            }
         }
     }
 }

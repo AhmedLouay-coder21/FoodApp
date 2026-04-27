@@ -14,7 +14,6 @@ namespace FoodApp
         public string? Instructions{ get; set; }
         public string? Tags{ get; set; }
         public string? YoutubeLink { get; set; }
-        public string? Measure{ get; set; }
         public string? IngredientsJson { get; set; }
     }
 }

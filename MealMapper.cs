@@ -1,6 +1,5 @@
 using System.Text.Json;
-using FoodApp.Models;
-namespace FoodApp;
+namespace FoodApp.Models;
 public static class MealMapper
 {
     public static MealDb ToDb(Meal meal)
