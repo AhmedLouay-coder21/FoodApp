@@ -1,7 +1,6 @@
 using Spectre.Console;
 using FoodApp.Models;
 using FoodApp.Services;
-using Microsoft.AspNetCore.Http.Features;
 using System.Text.RegularExpressions;
 
 namespace FoodApp.Controllers;
@@ -63,7 +62,7 @@ public class MealController
             Border = BoxBorder.Rounded,
             Padding = new Padding(1, 1, 1, 1)
         };
-
+        
         AnsiConsole.Write(panel);
     }
 }

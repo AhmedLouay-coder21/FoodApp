@@ -6,7 +6,7 @@ using FoodApp.Services;
 
 namespace FoodApp
 {
-    internal class MainMenu
+    public class MainMenu
     {
         public static async Task StartProgram()
         {
