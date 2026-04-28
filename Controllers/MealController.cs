@@ -6,6 +6,8 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using FoodApp.Data;
 using FoodApp.Models;
+using FoodApp.Mappers;
+
 public class MealController
 {
     private readonly IMealService _mealService;
@@ -21,7 +23,7 @@ public class MealController
     {
         var meals = await _mealService.SearchByName(name);
 
-        if (!meals.Any())
+        if (meals.Count == 0)
         {
             AnsiConsole.MarkupLine("[red]No meals found![/]");
             return;
@@ -43,44 +45,14 @@ public class MealController
         var selectedMealName = AnsiConsole.Prompt(prompt);
         var meal = meals.FirstOrDefault(m => m.strMeal == selectedMealName);
         var url = meal?.strMealThumb;
-        var mealName = meal?.strMeal;
-        if (!string.IsNullOrEmpty(url))
-        {
-            var localPath = await _mealService.SaveImageAsync(url,mealName);
-            var image = new CanvasImage(localPath)
-            .MaxWidth(100)
-            .BicubicResampler();
-            AnsiConsole.Write(image);
-        }
         if(meal is null)
         {
             AnsiConsole.MarkupLine("[red]Error: Could not retrieve meal details.[/]");
             return;
         }
-        var ingredientsText = string.Join("\n",
-    meal.GetIngredients().Select(i =>
-        string.IsNullOrWhiteSpace(i.Measure)
-            ? $"- {i.Name}"
-            : $"- {i.Name} ({i.Measure})"
-    ));
-    
-        var panel = new Panel($@"[OrangeRed1]Meal:[/] {meal.strMeal}
-[OrangeRed1]Category:[/] {meal.strCategory}
-[OrangeRed1]Area:[/] {meal.strArea}
 
-[OrangeRed1]Ingredients:[/]
-{ingredientsText}
-
-[OrangeRed1]Instructions:[/]
-{meal.strInstructions}
-        ")
-        {
-            Header = new PanelHeader("Meal Details"),
-            Border = BoxBorder.Rounded,
-            Padding = new Padding(1, 1, 1, 1)
-        };
-        
-        AnsiConsole.Write(panel);
+        var vm = MealMapper.FromApi(meal);
+        await DisplayMeal(vm);
         AnsiConsole.MarkupLine("[gray]Press shift + s to add this meal to favorite[/]");
         AnsiConsole.MarkupLine("[gray]Press any other key to continue[/]");
         var key = Console.ReadKey(true);
@@ -92,7 +64,7 @@ public class MealController
                 Name = meal.strMeal,
                 Category = meal.strCategory,
                 Area = meal.strArea,
-                Image = meal.strMeal + ".png",
+                Image = meal.strMealThumb,
                 Instructions = meal.strInstructions,
                 Tags = meal.strTags,
                 YoutubeLink = meal.strYoutube,
@@ -104,64 +76,72 @@ public class MealController
     }
     public async Task GetMeal(MealDbContext db) 
     { 
+        var meals = await db.Meals.ToListAsync();
+        
         var prompt = new SelectionPrompt<string>()
             .Title("Select a [OrangeRed1]meal[/]") 
             .PageSize(15); 
-        var meals = await db.Meals.ToListAsync();
         
-        var groupedMeals = meals 
-            .Where(m => m.Category != null && m.Name != null) 
+        var groupedMeals = meals
             .GroupBy(m => m.Category!)
             .OrderBy(g => g.Key);
+
         foreach (var group in groupedMeals) 
         { 
             prompt.AddChoiceGroup(group.Key, group.Select(m => m.Name!)); 
         } 
-        var selectedMealName = AnsiConsole.Prompt(prompt);
 
+        var selectedMealName = AnsiConsole.Prompt(prompt);
         var meal = meals.FirstOrDefault(m => m.Name == selectedMealName);
-        if (meal == null)
+        if (meal is null)
         {
             AnsiConsole.MarkupLine("[red]Error: Could not retrieve meal details.[/]");
             return;
         }
-        var ingredients = JsonSerializer.Deserialize<List<Ingredient>>(meal.IngredientsJson ?? "Unknown")
-                        ?? new List<Ingredient>();
+
+        var vm = MealMapper.FromDb(meal);
+        await DisplayMeal(vm);
+        AnsiConsole.MarkupLine("[gray]Press any other key to continue[/]");
+        Console.ReadKey(true);
+        AnsiConsole.Clear();
+    }
+    private async Task DisplayMeal(MealViewModel meal)
+    {
+        if (!string.IsNullOrEmpty(meal.Image))
+        {
+            var localPath = await _mealService.SaveImageAsync(meal.Image, meal.Name);
+            var image = new CanvasImage(localPath)
+                .MaxWidth(100)
+                .BicubicResampler();
+
+            AnsiConsole.Write(image);
+        }
 
         var ingredientsText = string.Join("\n",
-            ingredients.Select(i =>
+            meal.Ingredients.Select(i =>
                 string.IsNullOrWhiteSpace(i.Measure)
                     ? $"- {i.Name}"
                     : $"- {i.Name} ({i.Measure})"
             )
         );
-        if (!string.IsNullOrEmpty(meal.Name))
-        {
-            var localPath = await _mealService.SaveImageAsync(" ",meal.Name);
-            var image = new CanvasImage(localPath)
-            .MaxWidth(100)
-            .BicubicResampler();
-            AnsiConsole.Write(image);
-        }
+
         var panel = new Panel($@"
-[OrangeRed1]Meal:[/] {Markup.Escape(meal.Name ?? "Unknown")}
-[OrangeRed1]Category:[/] {Markup.Escape(meal.Category ?? "Unknown")}
-[OrangeRed1]Area:[/] {Markup.Escape(meal.Area ?? "Unknown")}
+    [OrangeRed1]Meal:[/] {Markup.Escape(meal.Name)}
+    [OrangeRed1]Category:[/] {Markup.Escape(meal.Category)}
+    [OrangeRed1]Area:[/] {Markup.Escape(meal.Area)}
 
-[OrangeRed1]Ingredients:[/]
-{Markup.Escape(ingredientsText)}
+    [OrangeRed1]Ingredients:[/]
+    {Markup.Escape(ingredientsText)}
 
-[OrangeRed1]Instructions:[/]
-{Markup.Escape(meal.Instructions ?? "Unknown")}
+    [OrangeRed1]Instructions:[/]
+    {Markup.Escape(meal.Instructions)}
         ")
         {
             Header = new PanelHeader("Meal Details"),
             Border = BoxBorder.Rounded,
-            Padding = new Padding(1, 1, 1, 1)
+            Padding = new Padding(1)
         };
-            AnsiConsole.Write(panel);
-            AnsiConsole.MarkupLine("[gray]Press any other key to continue[/]");
-            Console.ReadKey(true);
-            AnsiConsole.Clear();
-    }
+
+        AnsiConsole.Write(panel);
+    }  
 }
