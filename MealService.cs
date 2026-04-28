@@ -27,7 +27,7 @@ public class MealService : IMealService
     }
     public async Task<string> SaveImageAsync(string url, string name)
     {
-        var folder = Path.Combine(Directory.GetCurrentDirectory(), "Files");
+        var folder = Path.Combine(Directory.GetCurrentDirectory(), "Images");
         Directory.CreateDirectory(folder);
         var fileName = name + ".png";
         var path = Path.Combine(folder, fileName);
