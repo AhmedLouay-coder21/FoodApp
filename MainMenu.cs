@@ -27,7 +27,7 @@ namespace FoodApp
             var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Select an [OrangeRed1]option[/]:")
-                .AddChoices("Search for a new recipe", "View favorite recipes", "Edit a recipes"));
+                .AddChoices("Search for a new recipe", "View favorite recipes", "Edit a recipe"));
         
             switch (choice)
             {
