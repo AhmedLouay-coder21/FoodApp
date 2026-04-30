@@ -64,22 +64,22 @@ public class MealController
     {
         var prompt = new SelectionPrompt<string>()
             .Title("Select a [OrangeRed1]meal[/]") 
-            .PageSize(15); 
+            .PageSize(15);
+        var groupedMeals = meals
+            .GroupBy(m => m.Category!)
+            .OrderBy(g => g.Key);
+
+        foreach (var group in groupedMeals) 
+        { 
+            prompt.AddChoiceGroup(group.Key, group.Select(m => m.Name!)); 
+        }
+        
         var selectedMealName = AnsiConsole.Prompt(prompt);
         var meal = meals.FirstOrDefault(m => m.Name == selectedMealName);
         if (meals.Count == 0 && meal != null)
         {
             AnsiConsole.MarkupLine("[red]No meals found![/]");
             return meal;
-        }
-        
-        var groupedMeals = meals
-            .GroupBy(m => m.Category!)
-            .OrderBy(g => g.Key);
-        
-        foreach (var group in groupedMeals) 
-        { 
-            prompt.AddChoiceGroup(group.Key, group.Select(m => m.Name!)); 
         }
 
         if (!string.IsNullOrEmpty(meal?.Image))
@@ -93,11 +93,11 @@ public class MealController
         }
 
         var ingredientsText = string.Join("\n",
-            meal.Ingredients.Select(i =>
+            meal?.Ingredients?.Select(i =>
                 string.IsNullOrWhiteSpace(i.Measure)
                     ? $"- {i.Name}"
                     : $"- {i.Name} ({i.Measure})"
-            )
+            ) ?? new List<string>()
         );
 
         var panel = new Panel($@"
