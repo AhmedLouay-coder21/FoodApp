@@ -28,7 +28,7 @@ namespace FoodApp
             var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Select an [OrangeRed1]option[/]:")
-                .AddChoices("Search for a new recipe", "View favorite recipes", "Edit a recipe", "[red]Exit[/]"));
+                .AddChoices("Search for a new recipe", "View favorite recipes", "Edit a recipe", "Delete a recipe", "[red]Exit[/]"));
         
             switch (choice)
             {
@@ -43,6 +43,9 @@ namespace FoodApp
                     break;
                 case "Edit a recipe":
                     await mealController.EditMeal(db);
+                    break;
+                case "Delete a recipe":
+                    await mealController.DeleteMeal(db);
                     break;
                 case "[red]Exit[/]":
                     System.Environment.Exit(1);

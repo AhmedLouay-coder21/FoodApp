@@ -61,7 +61,7 @@ public class MealController
         Console.ReadKey(true);
         AnsiConsole.Clear();
     }
-     public async Task EditMeal(MealDbContext db)
+    public async Task EditMeal(MealDbContext db)
     {
         var meals = await db.Meals.ToListAsync();
         var vm = meals.Select(m => MealMapper.FromDb(m)).ToList();
@@ -120,6 +120,25 @@ public class MealController
         AnsiConsole.MarkupLine("[gray]Press any key to continue[/]");
         Console.ReadKey();
         await db.SaveChangesAsync();
+    }
+    public async Task DeleteMeal(MealDbContext db)
+    {
+        var meals = await db.Meals.ToListAsync();
+        var vm = meals.Select(m => MealMapper.FromDb(m)).ToList();
+        var selectedVm = await DisplayMeal(vm);
+        if (AnsiConsole.Confirm("[red]This will delete the whole data stored about this meal[/] Are you sure you wanna continue?"))
+        {
+            var mealToDelete = meals.FirstOrDefault(m => m.Name == selectedVm.Name);
+            db.Meals.Remove(mealToDelete);
+            await db.SaveChangesAsync();
+            AnsiConsole.MarkupLine("[green]Meal deleted successfully![/]");
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("[yellow]The operation was cancelled[/]");
+        }
+        AnsiConsole.MarkupLine("[gray]Press any key to continue[/]");
+        Console.ReadKey();
     }
     private async Task<MealViewModel> DisplayMeal(List<MealViewModel> meals)
     {
