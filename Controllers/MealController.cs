@@ -123,7 +123,7 @@ public class MealController
     }
     private async Task<MealViewModel> DisplayMeal(List<MealViewModel> meals)
     {
-        if (meals == null || meals.Count == 0)
+        if (meals == null || !meals.Any())
         {
             AnsiConsole.MarkupLine("[red]No meals found![/]");
             return null;
@@ -142,11 +142,7 @@ public class MealController
         
         var selectedMealName = AnsiConsole.Prompt(prompt);
         var meal = meals.FirstOrDefault(m => m.Name == selectedMealName);
-        if (meals.Count == 0 && meal != null)
-        {
-            AnsiConsole.MarkupLine("[red]No meals found![/]");
-            return meal;
-        }
+        if (meal == null) return null;
 
         if (!string.IsNullOrEmpty(meal?.Image))
         {

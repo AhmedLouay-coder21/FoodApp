@@ -39,20 +39,11 @@ namespace FoodApp
                     await mealController.SearchByName(mealName);
                     break;
                 case "View favorite recipes":
-                    try
-                    {
-                        await mealController.GetMeal(db);
-                    }
-                    catch
-                    {
-                        AnsiConsole.MarkupLine("[red]No meals were found in favorite[/]");
-                        AnsiConsole.MarkupLine("[gray]Press any key to continue[/]");
-                        Console.ReadKey();
-                    }
+                    await mealController.GetMeal(db);
                     AnsiConsole.Clear();
                     break;
                 case "Edit a recipe":
-                await mealController.EditMeal(db);
+                    await mealController.EditMeal(db);
                     break;
             }
         }
