@@ -28,31 +28,8 @@ public class MealController
             AnsiConsole.MarkupLine("[red]No meals found![/]");
             return;
         }
-
-        var prompt = new SelectionPrompt<string>()
-            .Title("Select a [OrangeRed1]meal[/]")
-            .PageSize(15);
-
-        var groupedMeals = meals
-            .GroupBy(m => m.strCategory)
-            .OrderBy(g => g.Key);
-
-        foreach (var group in groupedMeals)
-        {
-            prompt.AddChoiceGroup(group.Key, group.Select(m => m.strMeal));
-        }
-
-        var selectedMealName = AnsiConsole.Prompt(prompt);
-        var meal = meals.FirstOrDefault(m => m.strMeal == selectedMealName);
-        var url = meal?.strMealThumb;
-        if(meal is null)
-        {
-            AnsiConsole.MarkupLine("[red]Error: Could not retrieve meal details.[/]");
-            return;
-        }
-
-        var vm = MealMapper.FromApi(meal);
-        await DisplayMeal(vm);
+        var vm = meals.Select(m => MealMapper.FromApi(m)).ToList();
+        var meal = await DisplayMeal(vm);
         AnsiConsole.MarkupLine("[gray]Press shift + s to add this meal to favorite[/]");
         AnsiConsole.MarkupLine("[gray]Press any other key to continue[/]");
         var key = Console.ReadKey(true);
@@ -61,14 +38,14 @@ public class MealController
         {
             var mealDb = new MealDb
             {
-                Name = meal.strMeal,
-                Category = meal.strCategory,
-                Area = meal.strArea,
-                Image = meal.strMealThumb,
-                Instructions = meal.strInstructions,
-                Tags = meal.strTags,
-                YoutubeLink = meal.strYoutube,
-                IngredientsJson = JsonSerializer.Serialize(meal.GetIngredients())
+                Name = meal.Name,
+                Category = meal.Category,
+                Area = meal.Area,
+                Image = meal.Image,
+                Instructions = meal.Instructions,
+                Tags = meal.Tags,
+                YoutubeLink = meal.YoutubeLink,
+                IngredientsJson = JsonSerializer.Serialize(meal.Ingredients)
             };
             await _repo.AddMealAsync(mealDb);
             AnsiConsole.MarkupLine("[green]Saved successfully![/]");
@@ -77,37 +54,35 @@ public class MealController
     public async Task GetMeal(MealDbContext db) 
     { 
         var meals = await db.Meals.ToListAsync();
-        
-        var prompt = new SelectionPrompt<string>()
-            .Title("Select a [OrangeRed1]meal[/]") 
-            .PageSize(15); 
-        
-        var groupedMeals = meals
-            .GroupBy(m => m.Category!)
-            .OrderBy(g => g.Key);
-
-        foreach (var group in groupedMeals) 
-        { 
-            prompt.AddChoiceGroup(group.Key, group.Select(m => m.Name!)); 
-        } 
-
-        var selectedMealName = AnsiConsole.Prompt(prompt);
-        var meal = meals.FirstOrDefault(m => m.Name == selectedMealName);
-        if (meal is null)
-        {
-            AnsiConsole.MarkupLine("[red]Error: Could not retrieve meal details.[/]");
-            return;
-        }
-
-        var vm = MealMapper.FromDb(meal);
+        var vm = meals.Select(m => MealMapper.FromDb(m)).ToList();
         await DisplayMeal(vm);
         AnsiConsole.MarkupLine("[gray]Press any other key to continue[/]");
         Console.ReadKey(true);
         AnsiConsole.Clear();
     }
-    private async Task DisplayMeal(MealViewModel meal)
+    private async Task<MealViewModel> DisplayMeal(List<MealViewModel> meals)
     {
-        if (!string.IsNullOrEmpty(meal.Image))
+        var prompt = new SelectionPrompt<string>()
+            .Title("Select a [OrangeRed1]meal[/]") 
+            .PageSize(15); 
+        var selectedMealName = AnsiConsole.Prompt(prompt);
+        var meal = meals.FirstOrDefault(m => m.Name == selectedMealName);
+        if (meals.Count == 0 && meal != null)
+        {
+            AnsiConsole.MarkupLine("[red]No meals found![/]");
+            return meal;
+        }
+        
+        var groupedMeals = meals
+            .GroupBy(m => m.Category!)
+            .OrderBy(g => g.Key);
+        
+        foreach (var group in groupedMeals) 
+        { 
+            prompt.AddChoiceGroup(group.Key, group.Select(m => m.Name!)); 
+        }
+
+        if (!string.IsNullOrEmpty(meal?.Image))
         {
             var localPath = await _mealService.SaveImageAsync(meal.Image, meal.Name);
             var image = new CanvasImage(localPath)
@@ -143,5 +118,6 @@ public class MealController
         };
 
         AnsiConsole.Write(panel);
+        return meal;
     }  
 }
