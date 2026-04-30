@@ -31,7 +31,6 @@ public class MealController
         var vm = meals.Select(m => MealMapper.FromApi(m)).ToList();
         var meal = await DisplayMeal(vm);
         AnsiConsole.MarkupLine("[gray]Press shift + s to add this meal to favorite[/]");
-        AnsiConsole.MarkupLine("[gray]Press any other key to continue[/]");
         var key = Console.ReadKey(true);
 
         if (key.Key == ConsoleKey.S && key.Modifiers.HasFlag(ConsoleModifiers.Shift))
@@ -49,6 +48,8 @@ public class MealController
             };
             await _repo.AddMealAsync(mealDb);
             AnsiConsole.MarkupLine("[green]Saved successfully![/]");
+            AnsiConsole.MarkupLine("[gray]Press any other key to continue[/]");
+            Console.ReadKey();
         }
     }
     public async Task GetMeal(MealDbContext db) 
@@ -56,12 +57,77 @@ public class MealController
         var meals = await db.Meals.ToListAsync();
         var vm = meals.Select(m => MealMapper.FromDb(m)).ToList();
         await DisplayMeal(vm);
-        AnsiConsole.MarkupLine("[gray]Press any other key to continue[/]");
+        AnsiConsole.MarkupLine("[gray]Press any key to continue[/]");
         Console.ReadKey(true);
         AnsiConsole.Clear();
     }
+     public async Task EditMeal(MealDbContext db)
+    {
+        var meals = await db.Meals.ToListAsync();
+        var vm = meals.Select(m => MealMapper.FromDb(m)).ToList();
+        var meal = await DisplayMeal(vm);
+
+        var fieldsToEdit = new SelectionPrompt<string>()
+            .Title("Choose the fields you want to edit")
+            .PageSize(15);
+        string[] columnNames = typeof(MealDb).GetProperties()
+                .Select(x => x.Name)
+                .Where(x => x != "Image" && x != "Id" && x != "Instructions")
+                .ToArray();
+
+        fieldsToEdit.AddChoices(columnNames);
+        var UserChoice = AnsiConsole.Prompt(fieldsToEdit);
+
+        var mealToUpdate =  meals.FirstOrDefault(m => m.Name == meal.Name);
+        if (UserChoice == "IngredientsJson")
+        {
+            var ingredients = JsonSerializer.Deserialize<List<Ingredient>>(mealToUpdate?.IngredientsJson ?? "[]") 
+                        ?? new List<Ingredient>();
+
+            var ingredientToEdit = AnsiConsole.Prompt(
+            new SelectionPrompt<Ingredient>()
+                .Title("Select an ingredient to modify")
+                .UseConverter(i => $"{i.Name} ({i.Measure})")
+                .AddChoices(ingredients)
+            );
+
+            var partToEdit = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title($"Editing {ingredientToEdit.Name}: What do you want to change?")
+                    .AddChoices("Name", "Measure")
+            );
+
+            string newValueForPart = AnsiConsole.Ask<string>($"Enter new {partToEdit}:");
+
+            int index = ingredients.IndexOf(ingredientToEdit);
+            // Records are immutable, so use 'with'[cite: 2]
+            ingredients[index] = partToEdit == "Name" 
+                ? ingredientToEdit with { Name = newValueForPart } 
+                : ingredientToEdit with { Measure = newValueForPart };
+
+            mealToUpdate?.IngredientsJson = JsonSerializer.Serialize(ingredients);
+        }
+        else
+        {
+            var property = mealToUpdate?.GetType().GetProperty(UserChoice);
+            if (property != null && property.CanWrite)
+            {
+                var newValue = AnsiConsole.Ask<string>($"Enter new value for {UserChoice}:");
+                property.SetValue(mealToUpdate, newValue);
+            }
+        }
+        AnsiConsole.MarkupLine("[green]Updated and saved successfully![/]");
+        AnsiConsole.MarkupLine("[gray]Press any key to continue[/]");
+        Console.ReadKey();
+        await db.SaveChangesAsync();
+    }
     private async Task<MealViewModel> DisplayMeal(List<MealViewModel> meals)
     {
+        if (meals == null || meals.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No meals found![/]");
+            return null;
+        }
         var prompt = new SelectionPrompt<string>()
             .Title("Select a [OrangeRed1]meal[/]") 
             .PageSize(15);
@@ -71,7 +137,7 @@ public class MealController
 
         foreach (var group in groupedMeals) 
         { 
-            prompt.AddChoiceGroup(group.Key, group.Select(m => m.Name!)); 
+            prompt.AddChoiceGroup(group.Key, group.Select(m => m.Name!));
         }
         
         var selectedMealName = AnsiConsole.Prompt(prompt);
@@ -101,20 +167,20 @@ public class MealController
         );
 
         var panel = new Panel($@"
-    [OrangeRed1]Meal:[/] {Markup.Escape(meal.Name)}
-    [OrangeRed1]Category:[/] {Markup.Escape(meal.Category)}
-    [OrangeRed1]Area:[/] {Markup.Escape(meal.Area)}
+[OrangeRed1]Meal:[/] {Markup.Escape(meal.Name)}
+[OrangeRed1]Category:[/] {Markup.Escape(meal.Category)}
+[OrangeRed1]Area:[/] {Markup.Escape(meal.Area)}
 
-    [OrangeRed1]Ingredients:[/]
-    {Markup.Escape(ingredientsText)}
+[OrangeRed1]Ingredients:[/]
+{Markup.Escape(ingredientsText)}
 
-    [OrangeRed1]Instructions:[/]
-    {Markup.Escape(meal.Instructions)}
+[OrangeRed1]Instructions:[/]
+{Markup.Escape(meal.Instructions)}
         ")
         {
             Header = new PanelHeader("Meal Details"),
             Border = BoxBorder.Rounded,
-            Padding = new Padding(1)
+            Padding = new Padding(0)
         };
 
         AnsiConsole.Write(panel);

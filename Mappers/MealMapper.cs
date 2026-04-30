@@ -22,6 +22,17 @@ public static class MealMapper
     // DB → ViewModel
     public static MealViewModel FromDb(MealDb meal)
     {
+        List<Ingredient> ingredients;
+
+        try 
+        {
+            ingredients = JsonSerializer.Deserialize<List<Ingredient>>(meal.IngredientsJson ?? "[]") 
+                          ?? new List<Ingredient>();
+        }
+        catch (JsonException)
+        {
+            ingredients = new List<Ingredient>();
+        }
         return new MealViewModel
         {
             Name = meal.Name ?? "Unknown",
@@ -31,8 +42,7 @@ public static class MealMapper
             Instructions = meal.Instructions ?? "Unknown",
             Tags = meal.Tags ?? "Unknown",
             YoutubeLink = meal.YoutubeLink ?? "Unknown",
-            Ingredients = JsonSerializer.Deserialize<List<Ingredient>>(meal.IngredientsJson ?? "[]") 
-                          ?? new List<Ingredient>()
+            Ingredients = ingredients
         };
     }
 

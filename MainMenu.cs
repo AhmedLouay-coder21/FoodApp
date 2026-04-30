@@ -11,6 +11,7 @@ namespace FoodApp
     {
         public static async Task StartProgram()
         {
+            AnsiConsole.Clear();
             HttpClient client = new();
             var db = new MealDbContext();
             var mealService = new MealService(client);
@@ -32,12 +33,26 @@ namespace FoodApp
             switch (choice)
             {
                 case "Search for a new recipe":
+                    AnsiConsole.Clear();
                     var mealName = AnsiConsole.Ask<string>("What [OrangeRed1]meal[/] do you wanna discover?");
                     Console.Clear();
-                        await mealController.SearchByName(mealName);
+                    await mealController.SearchByName(mealName);
                     break;
                 case "View favorite recipes":
-                    await mealController.GetMeal(db);
+                    try
+                    {
+                        await mealController.GetMeal(db);
+                    }
+                    catch
+                    {
+                        AnsiConsole.MarkupLine("[red]No meals were found in favorite[/]");
+                        AnsiConsole.MarkupLine("[gray]Press any key to continue[/]");
+                        Console.ReadKey();
+                    }
+                    AnsiConsole.Clear();
+                    break;
+                case "Edit a recipe":
+                await mealController.EditMeal(db);
                     break;
             }
         }
