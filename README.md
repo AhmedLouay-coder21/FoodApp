@@ -75,12 +75,15 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 - [x] Feature 1: link the app with the mealdb api
 - [x] Feature 2: add search by name feature
-  - [ ] Nested Feature: select a meal after the fetch is over(all meals are listed) to show its ingredients 
+  - [x] Nested Feature: select a meal after the fetch is over(all meals are listed) to show its ingredients 
 - [ ] Feature 3: add search by category feature
     - [ ] Optional Feature 1: add search by country
-- [ ] Feature 4: add main menu to make it suitable for user usage
-- [ ] Feature 5: add save to favorites option
-- [ ] Feature 6: add edit favorite recipes
+- [x] Feature 4: add main menu to make it suitable for user usage
+- [x] Feature 5: add save to favorites option
+- [x] Feature 6: add edit favorite recipes
+- [ ] Feature 7: add lookup a random meal
+- [ ] Feature 8: add list all categories
+   - [ ] Optional Feature 2: add list all ingredients
 
 
 See the [open issues](https://github.com/AhmedLouay-coder21/FoodApp/issues) for a full list of proposed features (and known issues).
