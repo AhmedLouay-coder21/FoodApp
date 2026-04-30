@@ -28,14 +28,13 @@ namespace FoodApp
             var choice = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Select an [OrangeRed1]option[/]:")
-                .AddChoices("Search for a new recipe", "View favorite recipes", "Edit a recipe"));
+                .AddChoices("Search for a new recipe", "View favorite recipes", "Edit a recipe", "[red]Exit[/]"));
         
             switch (choice)
             {
                 case "Search for a new recipe":
                     AnsiConsole.Clear();
                     var mealName = AnsiConsole.Ask<string>("What [OrangeRed1]meal[/] do you wanna discover?");
-                    Console.Clear();
                     await mealController.SearchByName(mealName);
                     break;
                 case "View favorite recipes":
@@ -44,6 +43,9 @@ namespace FoodApp
                     break;
                 case "Edit a recipe":
                     await mealController.EditMeal(db);
+                    break;
+                case "[red]Exit[/]":
+                    System.Environment.Exit(1);
                     break;
             }
         }
